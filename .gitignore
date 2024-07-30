@@ -6,3 +6,4 @@
 /data/output_2024.xlsx
 /scripts/data_processing.py
 /scripts/extract_data.py
+.DS_Store
