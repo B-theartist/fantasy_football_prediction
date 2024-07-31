@@ -8,7 +8,6 @@ This project aims to predict the next year's fantasy football points per game fo
 - `results/`: Contains the results, including the predictions and evaluation plots.
 - `models/`: Contains the trained model files.
 - `scripts/`: Contains Python scripts for various tasks such as training, evaluation, prediction, and feature engineering.
-- `tests/`: Contains test scripts for the model.
 - `main.py`: Main script to run the project.
 - `README.md`: This file.
 
