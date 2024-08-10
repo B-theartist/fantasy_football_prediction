@@ -13,9 +13,11 @@ class FantasyFootballLSTM(nn.Module):
         # Additional dropout layer
         self.dropout = nn.Dropout(dropout_rate)
         
-        # Define a simpler fully connected layer
-        self.fc1 = nn.Linear(hidden_dim, 64)
-        self.fc2 = nn.Linear(64, 1)
+        # Define a more complex fully connected layer structure
+        self.fc1 = nn.Linear(hidden_dim, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 32)
+        self.fc4 = nn.Linear(32, 1)
         
     def forward(self, x):
         # Initialize hidden state and cell state
@@ -33,6 +35,8 @@ class FantasyFootballLSTM(nn.Module):
         
         # Pass the output through fully connected layers with relu activation
         out = torch.relu(self.fc1(out))
-        out = self.fc2(out)
+        out = torch.relu(self.fc2(out))
+        out = torch.relu(self.fc3(out))
+        out = self.fc4(out)
         
         return out

@@ -40,34 +40,37 @@ feature_names = ['Year', 'Age', 'G', 'Tgt', 'Rec', 'RecYds', 'RecTD', 'TD/G', 'R
                  '#ofY']
 target = 'NextYearFantPt/G'
 
-# Split the data into training and test sets
+# Split the data into training, validation, and test sets
 X = df[feature_names]
 y = df[target]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Filter data for 2023 to be used for prediction later
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 X_2023 = df_2023[feature_names]
 
 # Standardize the data
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
+X_val = scaler.transform(X_val)
 X_test = scaler.transform(X_test)
 X_2023 = scaler.transform(X_2023)
 
-# Ensure X_train, X_test, and X_2023 are correctly shaped for LSTM
+# Ensure X_train, X_val, X_test, and X_2023 are correctly shaped for LSTM
 X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
+X_val = X_val.reshape(X_val.shape[0], 1, X_val.shape[1])
 X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
 X_2023 = X_2023.reshape(X_2023.shape[0], 1, X_2023.shape[1])
 
-# Train the model
+# Train the model and save the best model
 input_dim = X_train.shape[2]
 hidden_dim = 128  # Set hidden dimension
 num_layers = 2  # Set number of LSTM layers
 model = FantasyFootballLSTM(input_dim, hidden_dim, num_layers)
-train_model(model, X_train, y_train, epochs=1000, learning_rate=0.001)
 
-# Save the model
-torch.save(model.state_dict(), model_path)
+best_model_path = 'models/trained_model.pth'
+train_model(model, X_train, y_train, X_val, y_val, epochs=1000, learning_rate=0.001, model_path=best_model_path)
+
+# Load the best model
+model.load_state_dict(torch.load(best_model_path))
 
 # Evaluate the model
 evaluate_model(model, X_test, y_test, X_train, y_train)
