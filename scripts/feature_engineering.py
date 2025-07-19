@@ -25,8 +25,9 @@ def preprocess_data(df):
 def add_rolling_averages(df):
     rolling_features = ['FantPtHalf/G', 'Tgt/G', 'RecYds/G']
     for feature in rolling_features:
-        df[f'{feature}Last2Y'] = df.groupby('Player')[feature].transform(lambda x: x.rolling(2, min_periods=1).mean())
-        df[f'{feature}Last3Y'] = df.groupby('Player')[feature].transform(lambda x: x.rolling(3, min_periods=1).mean())
+        # Shift by 1 to exclude current year from rolling window (prevents data leakage)
+        df[f'{feature}Last2Y'] = df.groupby('Player')[feature].transform(lambda x: x.shift(1).rolling(2, min_periods=1).mean())
+        df[f'{feature}Last3Y'] = df.groupby('Player')[feature].transform(lambda x: x.shift(1).rolling(3, min_periods=1).mean())
 
     return df
 

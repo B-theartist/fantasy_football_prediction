@@ -21,6 +21,8 @@ df = pd.read_excel(data_path)
 df = preprocess_data(df)
 df = add_rolling_averages(df)
 df = add_season_flags(df)
+# Fill NaNs after feature engineering to prevent issues in training/evaluation
+df.fillna(0, inplace=True)
 
 # Save 2024 data before shifting the target
 df_2024 = df[df['Year'] == 2024].copy()
