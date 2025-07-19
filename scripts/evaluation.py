@@ -25,11 +25,11 @@ def evaluate_model(model, X_test, y_test, X_train, y_train):
         y_train_pred = model(X_train_tensor).numpy()
         y_test_pred = model(X_test_tensor).numpy()
 
-    rmse_train = mean_squared_error(y_train, y_train_pred, squared=False)
+    rmse_train = np.sqrt(mean_squared_error(y_train, y_train_pred))
     mae_train = mean_absolute_error(y_train, y_train_pred)
     r2_train = r2_score(y_train, y_train_pred)
 
-    rmse_test = mean_squared_error(y_test, y_test_pred, squared=False)
+    rmse_test = np.sqrt(mean_squared_error(y_test, y_test_pred))
     mae_test = mean_absolute_error(y_test, y_test_pred)
     r2_test = r2_score(y_test, y_test_pred)
 

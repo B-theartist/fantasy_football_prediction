@@ -14,6 +14,7 @@ def preprocess_data(df):
     df.loc[:, 'RecYds/G'] = df['RecYds'] / df['G']
     df.loc[:, 'FantPt/G'] = df['FantPt'] / df['G']
     df.loc[:, 'Tgt/G'] = df['Tgt'] / df['G']
+    df.loc[:, 'FantPtHalf/G'] = df['FantPtHalf'] / df['G']
 
     # Handle division by zero and fill NaNs
     df.replace([float('inf'), -float('inf')], 0, inplace=True)
@@ -22,7 +23,7 @@ def preprocess_data(df):
     return df
 
 def add_rolling_averages(df):
-    rolling_features = ['FantPt/G', 'Tgt/G', 'RecYds/G']
+    rolling_features = ['FantPtHalf/G', 'Tgt/G', 'RecYds/G']
     for feature in rolling_features:
         df[f'{feature}Last2Y'] = df.groupby('Player')[feature].transform(lambda x: x.rolling(2, min_periods=1).mean())
         df[f'{feature}Last3Y'] = df.groupby('Player')[feature].transform(lambda x: x.rolling(3, min_periods=1).mean())
@@ -31,7 +32,7 @@ def add_rolling_averages(df):
 
 def shift_target(df):
     # Shift FantPt to represent the following year's points per game
-    df['NextYearFantPt/G'] = df.groupby('Player')['FantPt/G'].shift(-1)
+    df['NextYearFantPt/G'] = df.groupby('Player')['FantPtHalf/G'].shift(-1)
 
     # Remove rows where the target is NaN (i.e., no following year data)
     df = df[df['NextYearFantPt/G'].notna()]

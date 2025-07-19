@@ -14,7 +14,7 @@ import numpy as np
 data_path = 'data/cleaned_fantasy_football_data.xlsx'
 results_path = 'results'
 model_path = 'models/trained_model.pth'
-predictions_path = os.path.join(results_path, 'predictions_2024.xlsx')
+predictions_path = os.path.join(results_path, 'predictions_2025.xlsx')
 
 # Load and preprocess the data
 df = pd.read_excel(data_path)
@@ -22,10 +22,10 @@ df = preprocess_data(df)
 df = add_rolling_averages(df)
 df = add_season_flags(df)
 
-# Save 2023 data before shifting the target
-df_2023 = df[df['Year'] == 2023].copy()
-player_names_2023 = df_2023['Player'].reset_index(drop=True)
-df_2023 = df_2023.drop(columns=['Player'])
+# Save 2024 data before shifting the target
+df_2024 = df[df['Year'] == 2024].copy()
+player_names_2024 = df_2024['Player'].reset_index(drop=True)
+df_2024 = df_2024.drop(columns=['Player'])
 
 # Apply shift_target to remove rows with NaN target values
 df = shift_target(df)
@@ -34,10 +34,7 @@ df = shift_target(df)
 df = df.reset_index(drop=True)
 
 # Define features and target
-feature_names = ['Year', 'Age', 'G', 'Tgt', 'Rec', 'RecYds', 'RecTD', 'TD/G', 'RecYds/G',
-                 'FantPt/G', 'Tgt/G', 'FantPt/GLast2Y', 'FantPt/GLast3Y',
-                 'Tgt/GLast2Y', 'Tgt/GLast3Y', 'RecYds/GLast2Y', 'RecYds/GLast3Y',
-                 '#ofY']
+feature_names = ['Year', 'Age', 'G', 'Tgt', 'Rec', 'RecYds', 'RecTD', 'TD/G', 'RecYds/G', 'FantPtHalf/G', 'Tgt/G', 'FantPtHalf/GLast2Y',  'Tgt/GLast2Y', 'RecYds/GLast2Y', '#ofY']
 target = 'NextYearFantPt/G'
 
 # Split the data into training, validation, and test sets
@@ -45,20 +42,20 @@ X = df[feature_names]
 y = df[target]
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
-X_2023 = df_2023[feature_names]
+X_2024 = df_2024[feature_names]
 
 # Standardize the data
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_val = scaler.transform(X_val)
 X_test = scaler.transform(X_test)
-X_2023 = scaler.transform(X_2023)
+X_2024 = scaler.transform(X_2024)
 
-# Ensure X_train, X_val, X_test, and X_2023 are correctly shaped for LSTM
+# Ensure X_train, X_val, X_test, and X_2024 are correctly shaped for LSTM
 X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
 X_val = X_val.reshape(X_val.shape[0], 1, X_val.shape[1])
 X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
-X_2023 = X_2023.reshape(X_2023.shape[0], 1, X_2023.shape[1])
+X_2024 = X_2024.reshape(X_2024.shape[0], 1, X_2024.shape[1])
 
 # Train the model and save the best model
 input_dim = X_train.shape[2]
@@ -82,13 +79,21 @@ plot_correlation_matrix(df, feature_names + [target], results_path)
 y_test_pred = predict(model, X_test)
 
 # Make predictions for 2024 data
-predictions_2023 = predict(model, X_2023)
-predictions_df = pd.DataFrame(predictions_2023, columns=['Predicted_FantPt/G'])
+predictions_2024 = predict(model, X_2024)
+predictions_df = pd.DataFrame(predictions_2024, columns=['Predicted_FantPt/G'])
 
 # Ensure player names are included in predictions
-predictions_df['Player'] = player_names_2023
+predictions_df['Player'] = player_names_2024
+
+# Round predictions to 1 decimal place
+predictions_df['Predicted_FantPt/G'] = predictions_df['Predicted_FantPt/G'].round(1)
+
+# Sort by predicted fantasy points per game in descending order
+predictions_df = predictions_df.sort_values(by='Predicted_FantPt/G', ascending=False).reset_index(drop=True)
+
+# Save to file
 save_predictions(predictions_df, predictions_path)
-print(f"Predictions for 2024 saved to '{predictions_path}'")
+print(f"Predictions for 2025 saved to '{predictions_path}'")
 
 # Plot distribution curve for actual vs predicted values
 plot_distribution(y_test, y_test_pred, results_path)

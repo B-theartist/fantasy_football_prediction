@@ -4,7 +4,7 @@ import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 
 class WeightedMSELoss(nn.Module):
-    def __init__(self, high_threshold=14.5, low_threshold=4, high_weight=6, low_weight=1, very_low_weight=3):
+    def __init__(self, high_threshold=15, low_threshold=4, high_weight=4, low_weight=1, very_low_weight=3):
         super(WeightedMSELoss, self).__init__()
         self.high_threshold = high_threshold
         self.low_threshold = low_threshold
@@ -21,7 +21,7 @@ class WeightedMSELoss(nn.Module):
         return loss
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs=1000, learning_rate=0.001, model_path='models/best_model.pth'):
-    criterion = WeightedMSELoss(high_threshold=14.5, low_threshold=4.0, high_weight=6, low_weight=1, very_low_weight=3)
+    criterion = WeightedMSELoss(high_threshold=15, low_threshold=4.0, high_weight=4, low_weight=1, very_low_weight=3)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
