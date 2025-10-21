@@ -7,3 +7,7 @@
 /scripts/data_processing.py
 /scripts/extract_data.py
 .DS_Store
+# ignore local training outputs
+results/
+models/*.pth
+
